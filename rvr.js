@@ -12,9 +12,12 @@ var blueBV = 100;
 
 var trenchCount = 0;
 var waterDone = false;
-
+var courseSide = 953;
+var halfSide=150;
+var fireLength=50;
 var OuterloopOn= true;
 var inTrench = true;
+
 async function onColor(color) {
 	if (color.r !== 236 || color.g !== 185 || color.b !== 9) return;
 }
@@ -154,7 +157,7 @@ async function forwardToRed() {
 			await roll(270,-30,5);
 			await setHeading(0);
 			await speak("Trench Completed", true);
-			trenchCount = trenchCount+1;
+			
 			await roll (0,80,2);
 			inTrench = false;
 			
@@ -179,4 +182,27 @@ async function rightTurn() {
 	}
 	await speak("Yaw : " + getOrientation().yaw,false);
 
+}
+
+async function completeSide() {
+	await roll (0,100,courseSide);
+	setSpeed(0);						
+	setHeading(270);
+	resetAim();
+	await driveToDistance(0, 25, 214);
+	//water tower knocking
+	setHeading(270);
+	await driveToDistance(270, 10, 10);
+	await driveToDistance(270, 10, -10);
+	//Finishing top path back to ramp
+	setHeading(0);
+	await driveToDistance(0,25,214);
+	setHeading(270);
+	resetAim();
+	await roll(0,100,353);
+}
+async function firePark() {
+	await roll (0,80,halfSide);
+	await setheading(270);
+	await roll (0,100, fireLength);
 }
