@@ -1,23 +1,20 @@
 var _colors = [{"r":236,"g":185,"b":9}];
-var redRV = 220;
+var redRV = 120;
 var redGV = 50; //less than
 //var redBV = 0;
 var yellowRV = 190;
 var yellowGV = 130;
-var yellowBV = 40;
-var greenRV = 80; //less than
-var greenGV = 120;
-var greenBV = 220; //less than
+var yellowBV = 60;
+var greenRV = 20; //less than
+var greenGV = 70;
+var greenBV = 100; //less than
 var blueBV = 100;
 
 var trenchCount = 0;
 var waterDone = false;
-var courseSide = 953;
-var halfSide=150;
-var fireLength=50;
+var trenchLength =0;
 var OuterloopOn= true;
 var inTrench = true;
-
 async function onColor(color) {
 	if (color.r !== 236 || color.g !== 185 || color.b !== 9) return;
 }
@@ -29,22 +26,19 @@ async function startProgram() {
 	listenForColorSensor(_colors);
 	//start going up hill
 	
-	await delay(0.05);
 	while (OuterloopOn) {
-		setSpeed(40);
-		
+		setSpeed(30);
+		//await speak(("R"+getColorChannel("red")+"G"+getColorChannel("green")+"B"+getColorChannel("blue")), false);
+
 		//moving up hill and searching for yellow square
-		if (((getColorChannel("red") > yellowRV) && (getColorChannel("green") > yellowGV)&&(getColorChannel("blue")<yellowBV))&&(trenchCount<3)) {
-			await delay(0.3);
+		if (((getColorChannel("red") > yellowRV) && (getColorChannel("green") > yellowGV)&&(getColorChannel("blue")<yellowBV))&&(!((getColorChannel("red") > 200) && (getColorChannel("green") > 200)&&(getColorChannel("blue")>200)))) {
+			await delay(0.5);
 			
 			await stopRoll();
 			
 			//setSpeed(4);
-			await delay(1);
-			//OuterloopOn = false;
-			//await delay(0.02);
 			
-			//await strobe({ r: 255, g: 255, b: 37 }, 0.1, 50);
+
 			//Trench Procedure 1
 			await speak("Yellow", true);
 			
@@ -56,7 +50,7 @@ async function startProgram() {
 			
 		}
 		//detect green
-		else if (((getColorChannel("green") > greenGV) && (getColorChannel("blue") < greenBV) && (getColorChannel("red") < greenRV))&&(trenchCount<3))  {
+		else if (((getColorChannel("green") > greenGV) && (getColorChannel("blue") < greenBV) && (getColorChannel("red") < greenRV))&&(!((getColorChannel("red") > 200) && (getColorChannel("green") > 200)&&(getColorChannel("blue")>200))))  {
 			await stopRoll();
 			await roll(0,15,1.5);
 			setSpeed(5);
@@ -77,7 +71,7 @@ async function startProgram() {
 		}
 		
 		//detect blue
-		else if ((getColorChannel("blue") > blueBV)&&(!waterDone)) {
+		else if (((getColorChannel("blue") > blueBV)&&(!waterDone))&&(getColorChannel("blue")<220)) {
 			setSpeed(0);						
 			setHeading(270);
 			resetAim();
@@ -96,7 +90,7 @@ async function startProgram() {
 			
 			
 		}
-		else if ((getColorChannel("blue") > blueBV)&&(!waterDone)){
+		else if ((getColorChannel("blue") > blueBV)&&(waterDone)){
 			setSpeed(0);
 			setHeading(270);
 			await driveToDistance(270,25,429);
@@ -117,14 +111,14 @@ async function startProgram() {
 		
 		//await speak("Broken from Loop", true);
 		await delay(0.025);
-		await speak("Main Loop",false);
+		//await speak("Main Loop",true);
 	
 	}
 }
 
 async function backToWall() {
 	
-	await roll(270,-15,5);
+	await roll(270,-15,3);
 	await speak("Back is to wall",false);
 	
 }
@@ -134,31 +128,37 @@ async function leftTurn() {
 	//await speak("Yaw : " + startYaw,false);
 	//await delay(3);
 	while (getOrientation().yaw < 90){
-		await rawMotor(0,65, 0.1);
+		await rawMotor(0,45, 0.1);
 		await speak("Trying to turn",false);
 		
 	}
 	while (getOrientation().yaw > 90){
-		await rawMotor(0,-30, 0.1);
+		await rawMotor(0,-10, 0.1);
 		await delay(0.025);
 	}
 	
-	await speak("Yaw : " + getOrientation().yaw,true);
+	//await speak("Yaw : " + getOrientation().yaw,true);
 
 }
 
 async function forwardToRed() {
-	setSpeed(30);
+	setSpeed(50);
 	while (inTrench){
 		// Check for red
 		if ((getColorChannel("red") > redRV) &&(getColorChannel("green") < redGV)){
+			
 			setSpeed(0);
-			await speak("Detected Red", true);
-			await roll(270,-30,5);
-			await setHeading(0);
+			//Pushing bean bags into trench
+			await roll(270,85,0.3);
+			//await speak("Detected Red", true);
+			
+			//Exiting trench
+			await driveToDistance(270, -35, trenchLength);
+			//await setHeading(0);
+			await rightTurn();
 			await speak("Trench Completed", true);
 			
-			await roll (0,80,2);
+			await roll (0,50,1);
 			inTrench = false;
 			
 				
@@ -168,24 +168,23 @@ async function forwardToRed() {
 	}
 }
 async function rightTurn() {
-	resetAim();
-	var startYaw = getOrientation().yaw;
-	await speak("Yaw : " + startYaw,false);
-	await delay(3);
+	
 	while (getOrientation().yaw > -90){
-		await rawMotor(20, 0, 0.1);
-		await delay(0.025);
+		await speak(getOrientation().yaw);
+		await rawMotor(30,0, 0.1);
+		await speak("Trying to turn",false);
+		
 	}
 	while (getOrientation().yaw < -90){
 		await rawMotor(-10,0, 0.1);
 		await delay(0.025);
+		await speak("Correcting Turn",false);
 	}
-	await speak("Yaw : " + getOrientation().yaw,false);
+	await speak("Done Turn",true);
 
 }
-
 async function completeSide() {
-	await roll (0,100,courseSide);
+	await driveToDistance(0, 100,953); //Entire Side length
 	setSpeed(0);						
 	setHeading(270);
 	resetAim();
@@ -199,10 +198,5 @@ async function completeSide() {
 	await driveToDistance(0,25,214);
 	setHeading(270);
 	resetAim();
-	await roll(0,100,353);
-}
-async function firePark() {
-	await roll (0,80,halfSide);
-	await setheading(270);
-	await roll (0,100, fireLength);
+	await driveToDistance(0,80,351); //Smaller Side Length
 }
