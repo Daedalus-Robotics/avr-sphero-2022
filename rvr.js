@@ -15,6 +15,9 @@ var waterDone = false;
 var trenchLength =0;
 var OuterloopOn= true;
 var inTrench = true;
+var lengthToFire = 150; //cm from end of color to perpendicular fire house
+var lengthMidToHouse = 50// cm from middle of thing to the inside of fire house
+var lengthToWater =214 //cm from blue square to water tower
 async function onColor(color) {
 	if (color.r !== 236 || color.g !== 185 || color.b !== 9) return;
 }
@@ -43,7 +46,8 @@ async function startProgram() {
 			await speak("Yellow", true);
 			
 			//Left Turn Function
-			await leftTurn();
+			setHeading(270);
+			//await leftTurn();
 			
 			await backToWall();
 			await forwardToRed();
@@ -52,12 +56,10 @@ async function startProgram() {
 		//detect green
 		else if (((getColorChannel("green") > greenGV) && (getColorChannel("blue") < greenBV) && (getColorChannel("red") < greenRV))&&(!((getColorChannel("red") > 200) && (getColorChannel("green") > 200)&&(getColorChannel("blue")>200))))  {
 			await stopRoll();
-			await roll(0,15,1.5);
-			setSpeed(5);
-			await delay(0.2);
+			
 			OuterloopOn = false;
-			await stopRoll();
-			await speak("Green", true);
+			
+			//await speak("Green", true);
 		
 			//Left Turn Function
 			await leftTurn();
@@ -128,7 +130,7 @@ async function leftTurn() {
 	//await speak("Yaw : " + startYaw,false);
 	//await delay(3);
 	while (getOrientation().yaw < 90){
-		await rawMotor(0,45, 0.1);
+		await rawMotor(0,45, 0.05);
 		await speak("Trying to turn",false);
 		
 	}
@@ -188,15 +190,20 @@ async function completeSide() {
 	setSpeed(0);						
 	setHeading(270);
 	resetAim();
-	await driveToDistance(0, 25, 214);
+	await driveToDistance(0, 25, lengthToWater);
 	//water tower knocking
 	setHeading(270);
 	await driveToDistance(270, 10, 10);
 	await driveToDistance(270, 10, -10);
 	//Finishing top path back to ramp
 	setHeading(0);
-	await driveToDistance(0,25,214);
+	await driveToDistance(0,25,lengthToWater);
 	setHeading(270);
 	resetAim();
 	await driveToDistance(0,80,351); //Smaller Side Length
+}
+async function fireHouse() {
+	await driveToDistance(0, 50, lengthToFire);
+	setHeading(270);
+	await driveToDistance(270, 50,lengthMidToHouse);
 }
