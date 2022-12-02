@@ -1,11 +1,12 @@
 var lengthToWater =190;
 var n = 0;
+var distanceUpFirstRamp = 480;
 async function startProgram() {
 	//await speak("Blue",false);
 	
 	
 	
-	await driveToDistance(0,80,480);
+	await driveToDistance(0,100,distanceUpFirstRamp);
 	
 	stopRoll();
 	//await roll(0,50,1.75);
@@ -33,7 +34,8 @@ async function startProgram() {
 	
 	//rolling down hill to other side
 	await driveToDistance(0,100, 685);
-	await driveToDistance(0,100,436);
+	
+	await driveToDistance(0,100,630);
 	
 	
 	await driveToDistance(270, 80, lengthToWater);
@@ -44,7 +46,7 @@ async function startProgram() {
 	while (n<12){
 		
 		await driveToDistance(0, 150,25);
-		await driveToDistance(0,-70,25);
+		await driveToDistance(0,-70,40);
 		n++;
 	}
 	await driveToDistance(0,25,66);
@@ -52,9 +54,9 @@ async function startProgram() {
 	await driveToDistance(270,50,lengthToWater);
 	setHeading(180);
 	await delay(2);
-	resetAim();
+	/*resetAim();
 	
-	await driveToDistance(0,80,556);
+	await driveToDistance(0,80,530);
 	await driveToDistance(270,80,188);
 	
 	
@@ -73,6 +75,7 @@ async function startProgram() {
 		
 		
 		await delay(0.025);
+	*/
 	}
 	
 	
